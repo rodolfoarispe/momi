@@ -1,0 +1,22 @@
+name: connect
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - ipython
+  - sqlalchemy
+  # Depending on your exact setup a different mysql connector may work better than another
+  - pymysql
+  - keyring
+  - mysql-connector-python
+  - zeep
+  # Adicional
+  - flask
+  - flask-sqlalchemy
+  - flask-socketio
+  - gevent
+  - gevent-websocket
+  - wtforms
+  - python-socketio=4.6.0
+  - python-engineio=3.13.2

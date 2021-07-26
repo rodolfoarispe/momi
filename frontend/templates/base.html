@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--link rel="stylesheet" type="text/css" href="../static/css/bulma-min-0.4.0.css"/-->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.4.0/css/bulma.css'>
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css"/>
+    {% block head %}
+    {% endblock %}
+</head>
+
+<body>
+   
+  <header class="hero is-primary">
+        <div class="hero-head">
+            <nav class="nav has-shadow">
+                <div class="nav-left" >
+                    <a href="https://momi.com.pa/" class="navbar-item is-selected">
+                        <img src="{{ url_for('static', filename='images/momi-logo-footer_200x.png') }}" style="margin-top: 10px; margin-left: 5px;"  width="100px" alt="Momi: momentos felices"   >
+                    </a>
+                </div>
+            
+                <div class="nav-right nav-menu">
+                            <a href="{{ url_for('main_bp.index') }}" class="nav-item is-tab">
+                                Home
+                            </a>
+                            <a href="{{ url_for('auth_bp.login') }}" class="nav-item is-tab">
+                                Login
+                            </a>
+                            <a href="{{ url_for('auth_bp.register') }}" class="nav-item is-tab">
+                                Sign Up
+                            </a>
+                            <a href="{{ url_for('auth_bp.logout') }}" class="nav-item is-tab">
+                                Logout
+                            </a>
+                </div>
+            </nav>
+        </div>
+  </header>
+
+  <div class="section">
+      <div class="columns">
+        <aside class="column is-2">
+          <nav class="menu">
+              <p class="menu-label">
+                General
+              </p>
+              <ul class="menu-list">
+                <li><a class="" href="/">Dashboard</a></li>
+              </ul>
+              <p class="menu-label">
+                Administraci&oacute;n
+              </p>
+              <ul class="menu-list">
+                <li>
+                  <a class="">Bajar del ERP</a>
+                  <ul>
+                    <li><a href="/items">Inventario</a></li>
+                    <li><a href="/orders">Ordenes</a></li>
+                  </ul>
+                </li>
+              <p class="menu-label">
+                Transacciones
+              </p>
+              <ul class="menu-list">
+                <li>
+                  <a class="">Subir al ERP</a>
+                  <ul>
+                    <li><a href="/cash">Venta Contado</a></li>
+                    <li><a href="/credit">Venta Cr&eacute;dito</a></li>
+                  </ul>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="column">
+
+          {% block content %}
+          {% endblock %}
+ 
+        </main>
+      </div>
+    </div>
+         
+
+</body>
+
+</html>

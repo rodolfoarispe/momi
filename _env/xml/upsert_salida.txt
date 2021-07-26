@@ -1,0 +1,24 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <soapenv:Header>
+    <platformMsgs:documentInfo xmlns:platformMsgs="urn:messages_2020_1.platform.webservices.netsuite.com">
+      <platformMsgs:nsId>WEBSERVICES_6197523_SB1_01232021844600235625543979_a3a418487</platformMsgs:nsId>
+    </platformMsgs:documentInfo>
+  </soapenv:Header>
+  <soapenv:Body>
+    <upsertResponse xmlns="urn:messages_2020_1.platform.webservices.netsuite.com">
+      <writeResponse>
+        <platformCore:status xmlns:platformCore="urn:core_2020_1.platform.webservices.netsuite.com" isSuccess="false">
+          <platformCore:statusDetail type="ERROR">
+            <platformCore:code>USER_ERROR</platformCore:code>
+            <platformCore:message>Configure los detalles de inventario para esta l&amp;#xed;nea.</platformCore:message>
+          </platformCore:statusDetail>
+          <platformCore:statusDetail type="WARN">
+            <platformCore:code>WARNING</platformCore:code>
+            <platformCore:message>BEBIDA DE ARROZ CON PINA: You have only 0 available for commitment at this location (0 back ordered, 0 on order).</platformCore:message>
+          </platformCore:statusDetail>
+        </platformCore:status>
+        <baseRef xmlns:platformCore="urn:core_2020_1.platform.webservices.netsuite.com" externalId="FAI3996985" type="cashSale" xsi:type="platformCore:RecordRef"/>
+      </writeResponse>
+    </upsertResponse>
+  </soapenv:Body>
+</soapenv:Envelope>

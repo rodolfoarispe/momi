@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Momi ERP/POS - Venta Contado</title>
+{% endblock %}
+
+{% block content %}
+
+
+<div class="level">
+    <div class="level-left">
+      <div class="level-item">
+          <div class="title">Ventas Contado</div>
+      </div>
+    </div>
+    <div class="level-right">
+      <div class="level-item">
+      </div>
+    </div>    
+  </div>
+
+  <div class="columns is-multiline">
+
+    <div class="column">
+      <div class="box">
+        <div class="heading">Pendientes</div>
+        <div class="title" id="ant_totl">{{ "{:,.0f}".format(antes.totl or 0) }}</div>
+        <div class="level">
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Ventas</div>
+              <div class="title is-5" id="ant_facs">{{ "{:,.0f}".format(antes.facs) or 0 }}</div>
+            </div>
+          </div>
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Reversos</div>
+              <div class="title is-5" id="ant_devs">{{ "{:,.0f}".format(antes.devs) or 0 }}</div>
+            </div>
+          </div>
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Otros</div>
+              <div class="title is-5" id="ant_otrs">{{ "{:,.0f}".format(antes.otrs) or 0 }}</div>
+            </div>
+          </div>
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Monto</div>
+              <div class="title is-5" id="ant_monto">{{ "${:,.2f}".format(antes.monto) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if True %}
+
+    <div class="column">
+      <div class="box">
+        <div class="heading">Procesados</div>
+        <div class="title" id="act_totl">{{ "{:,.0f}".format(actual.totl or 0) }}</div>
+        <div class="level">
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Aceptado</div>
+              <div class="title is-5" id="act_facs">{{ "{:,.0f}".format(actual.facs) or 0 }}</div>
+            </div>
+          </div>
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Rechazado</div>
+              <div class="title is-5" id="act_devs">{{ "{:,.0f}".format(actual.devs) or 0 }}</div>
+            </div>
+          </div>
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Monto</div>
+              <div class="title is-5" id="ant_monto">{{ actual.monto  }}</div>
+            </div>
+          </div>
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Fecha</div>
+              <div class="title is-5" id="ant_fec">{{ "%Y-%m-%d".format(actual.fec) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {% else %}
+  <div class="column"></div>
+  {% endif %}
+  
+  </div>
+
+
+  <div class="field">
+    <p class="control">
+      <!--form action="/items"-->
+        <button  id="procesar" class="button is-success">
+           Procesar
+        </button>
+    <!--/form-->
+    </p>
+    <p id="mensajes"></p>
+  </div>
+
+
+
+  {% endblock %}

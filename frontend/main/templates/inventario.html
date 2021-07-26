@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Momi ERP/POS - Inventario</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="level">
+    <div class="level-left">
+      <div class="level-item">
+          <div class="title">Inventario de Art&iacute;culos</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="columns is-multiline">
+
+    <div class="column">
+      <div class="box">
+        <div class="heading">Anterior  {{ antes.fecha }}</div>
+        <div class="title" id="ant_cantidad">{{ "{:,.0f}".format(antes.cantidad or 0) }}</div>
+        <div class="level">
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Ensamblado</div>
+              <div class="title is-5" id="ant_ensamblado">{{ antes.ensamblado }}</div>
+            </div>
+          </div>
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Terminado</div>
+              <div class="title is-5" id="ant_terminado">{{ antes.terminado }}</div>
+            </div>
+          </div>
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Kit</div>
+              <div class="title is-5" id="ant_kit">{{ antes.kit }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="box">
+        <div class="heading">Actual  {{actual.fecha}}</div>
+        <div class="title" id="act_cantidad">{{ "{:,.0f}".format(actual.cantidad) }}</div>
+        <div class="level">
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Ensamblado</div>
+              <div class="title is-5" id="act_ensamblado">{{ actual.ensamblado }}</div>
+            </div>
+          </div>
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Terminado</div>
+              <div class="title is-5" id="act_terminado">{{ actual.terminado }}</div>
+            </div>
+          </div>
+          <div class="level-item">
+            <div class="">
+              <div class="heading">Kit</div>
+              <div class="title is-5" id="act_kit">{{ actual.kit }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+       <p class="control">
+       <!--form action="/items"-->
+        <button  id="procesar" class="button is-success">
+           Descargar
+        </button>
+        <!--/form-->
+       </p>
+       <p id="mensajes"></p>
+  </div>
+
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+  <script type="text/javascript" charset="utf-8">
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+  
+      let button = document.getElementById('procesar');
+      let mensajes = document.getElementById("mensajes");
+   
+      button.addEventListener('click', () => {
+        mensajes.innerHTML = "" ;
+        socket.emit('proceso', {data: 'items'}); 
+      });
+  
+      socket.on('items.procesando', function (data) {
+            
+            x = JSON.parse(data).data
+            button.disabled = true ;
+            document.body.style.cursor = 'wait';
+            document.getElementById('act_cantidad').innerHTML = x.cantidad ;
+            document.getElementById('act_ensamblado').innerHTML = ".." ;
+            document.getElementById('act_terminado').innerHTML = ".." ;
+            document.getElementById('act_kit').innerHTML = ".." ;
+
+      })
+
+      socket.on('items.mensajes', function (data) {
+        mensajes.innerHTML += "<br>" + JSON.parse(data).data
+      });
+
+      socket.on('items.procesado', function (data) {
+        mensajes.innerHTML += "<br>" + JSON.parse(data).data ;
+        button.disabled = false;
+        document.body.style.cursor = 'default';
+        setTimeout(() => {  window.location.reload(); }, 2000); //mil milisegundos = 1 segundo
+        
+      });
+      
+
+  </script>
+
+  {% endblock %}
