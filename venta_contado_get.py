@@ -6,10 +6,17 @@ import os
 
 from mysql.connector.cursor import MySQLCursor
 
-from momi import regCabecera, regDetalle
+from momi import regCabecera, regDetalle, tblRcpedidos
+import dbConn as db
+
 
 
 def buscarVentasContado(cnx, grupo='NW'):
+
+    session = db.Session()
+    tblRcpedidos.prepare(db.engine) #se refleja la clase
+    
+    dato = session.query(tblRcpedidos).first()
     cursor = cnx.cursor()
 
     try:
@@ -77,6 +84,6 @@ def leerVentaContado(cnx, cabecera):
 
 if __name__ == "__main__":
     pass
-  # registro = leerVentaContado()
+    registro = buscarVentasContado(db.engine.connect)
   # print (registro['cabecera'])
   # print (registro['detalle'])
