@@ -1,4 +1,9 @@
 from datetime import datetime, timedelta
+import dbConn as db
+
+# se definen clases que seran reflejadas
+class tblRcpedidos (db.DeferredReflection, db.Base):
+    __tablename__ = 'rcpedidos'
 
 class regCabecera:
     def __init__(self, registro=None) -> None:
