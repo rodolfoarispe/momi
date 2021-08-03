@@ -20,7 +20,7 @@ class Credentials():
         self.APPLICATION_ID    = "3CEE6B13-4B5E-4E42-9B61-EE78889973DB"
         self.NAME              = "Momi - Sandbox"
         self.CONSUMER_KEY      = "f25b76eb5b1851c75ac39e692a685dbe7f60842e362c43e6c4e53c35635371cc" # (CLIENT ID)
-        self.TOKEN_ID          =   "135a8997d02ff3bfc6daf555587b1fd4f3dd95a31e3642c3d43460d43c9f2ca6" #"566941115f6634f3a8e7ac9c4d580cd80042f176c560c2ee66cfbca12611d926"
+        self.TOKEN_ID          = "135a8997d02ff3bfc6daf555587b1fd4f3dd95a31e3642c3d43460d43c9f2ca6" #"566941115f6634f3a8e7ac9c4d580cd80042f176c560c2ee66cfbca12611d926"
 
    def getSignature(self):
         return Signature(self)
