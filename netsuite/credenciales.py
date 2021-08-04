@@ -28,7 +28,7 @@ class Credentials():
 class Signature():
 
     def __init__(self, cred:Credentials):   
-        self.ALGORITHM         = 'hmac-'+ hashlib.sha1().name     
+        self.ALGORITHM         = 'hmac-'+ hashlib.sha256().name     
         self.NONCE             = str(token_hex(32)) #token_urlsafe(32)
         self.TIMESTAMP         = str(round(time.time()))
          
@@ -54,7 +54,7 @@ def make_digest(message, key):
     key = bytes(key, 'UTF-8')
     message = bytes(message, 'UTF-8')
     
-    digester = hmac.new(key, message, hashlib.sha1)
+    digester = hmac.new(key, message, hashlib.sha256)
     #signature1 = digester.hexdigest()
     signature1 = digester.digest()
     #print(signature1)
