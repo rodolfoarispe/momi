@@ -451,7 +451,12 @@ def crear_bdatos():
         exit(1)
 
 def crear_tablas():
-    cnx = mysql.connector.connect(**config)
+    cnx =  mysql.connector.connect(
+	    host= DB_HOST,
+	    user= DB_USER,
+	    passwd= DB_PASSWORD
+    )
+    
     cursor = cnx.cursor(buffered=True) ##usamos buffer porque vamos a reutilizar el cursor y los resultados son minimos (solo un conteo) 
 
     try:
