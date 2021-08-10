@@ -1,3 +1,4 @@
+from logging import exception
 import mysql.connector
 import os 
 
@@ -23,6 +24,14 @@ class DataBaseClient():
             self.Connect()
 
 
+    def getCursor(self):
+        resp = None
+        try:
+            resp =  self.connection.cursor()
+        except exception as e:
+            pass
+        return resp 
+
     def Connect(self):
         config = {
             'user': self.DB_USER,
@@ -35,7 +44,7 @@ class DataBaseClient():
 
         try:
             self.connection =  mysql.connector.connect(**config)
-            self.cursor = self.connection.cursor()
+            self.cursor = self.getCursor()
             self.cursor.execute("USE {}".format(self.DB_NAME))
 
         except mysql.connector.Error as err:
