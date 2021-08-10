@@ -57,7 +57,6 @@ def getCustomField(object, name, field):
 
 
 
-
 def main(socket=None):
   logger = logging.getLogger(__name__)
   
@@ -71,9 +70,12 @@ def main(socket=None):
   clienteMomi = DataBaseClient(connect=True) 
   util.transmitir(socket, 'orders.mensajes', 'Conexión a MySQL... OK')
 
-  clienteMomi.connection.autocommit = True #queremos que insert cada sentencia ejecutada
+  clienteMomi.connection.autocommit = True #queremos que insert cada sentencia ejecutada      
 
-      
+  # CONTADORES
+  cont_cabecera = 0
+  cont_linea = 0
+
 
 #------DETALLES--------------
 
@@ -114,9 +116,6 @@ def main(socket=None):
                 values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
               """
 
-      # CONTADORES
-      cont_cabecera = 0
-      cont_linea = 0
 
       logger.info('Inicia el ciclo de carga de detalles, contador en %s' % cont_linea  )
 
@@ -143,8 +142,8 @@ def main(socket=None):
 
           )
 
-          logger.info('se cargo el documento %s - item %s' % (args[2], args[3]))
           clienteMomi.cursor.execute (query, args)
+          logger.info('se cargo el documento %s - item %s' % (args[2], args[3]))
           clienteMomi.connection.commit ()
 
           if cont_linea % 10 == 0:
@@ -164,6 +163,7 @@ def main(socket=None):
 
   SearchRecordType = clienteNs.salesFactory.TransactionSearchAdvanced(savedSearchScriptId = buscId)  
 
+ 
   searchResult = ns.Search(clienteNs, SearchRecordType)
 
   if searchResult.status.isSuccess and searchResult.totalRecords>0:  
@@ -187,7 +187,7 @@ def main(socket=None):
           , ubicacion            
           , tipo                 
           , importe_bruto        
-          , porc_descuento       
+          , cod_descuento       
           , importe_descuento    
           , creador              
           , fecha_creacion2      
@@ -203,32 +203,38 @@ def main(socket=None):
           , nombre
           , email
           , id_tel
+          , impuesto
+          , cant_lineas
 
 
                   ) 
-                  values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                  values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
               """
       logger.info('Inicia el ciclo de carga con el contador en %s' % cont_cabecera  )
 
       logger.info('Truncando la tabla cabecera en MySQL')
       clienteMomi.cursor.execute ('truncate table ns_ordenes_cabecera')
+      
 
       logger.info('Iniciando ciclo de carga en MySQL')
       for rec in searchResult.searchRowList.searchRow:
           cont_cabecera +=1
+
+          num_doc = nz(rec.basic, ['tranId','searchValue'])
 
           #OJO depende de que en efecto vengan con el tipo datetime (y no esten nulos)
           fecha_entrega = getCustomField(rec.basic,'custbody_ad_dm_date_delivery', ['searchValue'])
           fecha_entrega = fecha_entrega.astimezone() if fecha_entrega != None else None  
           hora_entrega  = getCustomField(rec.basic,'custbody_ad_pa_delivery_time', ['searchValue'])
           hora_entrega  = hora_entrega.astimezone() if hora_entrega != None else None 
+          total = nz(rec.basic, ['total','searchValue'])
           
           fecha_hora_entrega = None
           if fecha_entrega != None and hora_entrega != None:
             fecha_hora_entrega = datetime.combine(fecha_entrega.date(), hora_entrega.time())
 
           args = (
-               nz(rec.basic, ['tranId','searchValue']) #documento
+               num_doc #documento
              , nz(rec.basic, ['transactionNumber','searchValue']) #transaccion
              , nz(rec.basic, ['internalId', 'searchValue','internalId']) #internal de la orden
              , nz(rec.basic, ['tranDate','searchValue'])
@@ -238,9 +244,9 @@ def main(socket=None):
              , getCustomField(rec.basic, 'custbody_adc_usuario', ['searchValue','internalId'])
              , getCustomField(rec.basic,'custbody_ad_pa_store', ['searchValue', 'internalId'])
              , nz(rec.basic, ['type','searchValue'])
-             , nz(rec.basic, ['grossAmount','searchValue'])
+             , total
              , nz(rec.basic, ['promoCode','searchValue','internalId']) #tipo descuento
-             , nz(rec.basic, ['taxTotal', 'searchValue'])  # el campo es de 'monto descuento' pero estamos grabando el impuesto OJO
+             , None # monto descuento (no se recibe actualmente)
              , nz(rec.basic, ['createdBy','searchValue', 'internalId'])
              , nz(rec.basic, ['dateCreated','searchValue'])             
              , nz(rec.applyingTransactionJoin,['amount','searchValue'] ) #Abono
@@ -255,15 +261,15 @@ def main(socket=None):
              , nz(rec.customerMainJoin,['altName','searchValue']) #Nombre del cliente
              , nz(rec.customerMainJoin,['email','searchValue'])
              , nz(rec.customerMainJoin,['entityId','searchValue']) #id/telefono
+             , nz(rec.basic, ['taxTotal', 'searchValue'])  
+             , None #lineas (no se recibe por ahora)
 
-            
-
-
+          
 
           )
 
-          logger.info('se cargo el documento %s - transacc. %s' % (args[0], args[1]))
           clienteMomi.cursor.execute (query, args)
+          logger.info('se cargo el documento %s - transacc. %s' % (args[0], args[1]))
           clienteMomi.connection.commit ()
 
           if cont_cabecera % 5 == 0:
