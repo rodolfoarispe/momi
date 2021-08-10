@@ -105,7 +105,7 @@ def main(socket=None):
       fecha = rec[3]
       creador = rec[4]
 
-      p_stat = 'OK'
+      p_stat = 'ok'
       p_desc = ''
       p_err = []
 
