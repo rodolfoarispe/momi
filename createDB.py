@@ -170,7 +170,7 @@ TABLES['ns_ordenes_cabecera'] = (
            ubicacion            varchar(100),
            tipo                 varchar(100),
            importe_bruto        float,
-           porc_descuento       float,
+           cod_descuento        varchar(100),
            importe_descuento    float,
            creador              varchar(100),
            fecha_creacion2      timestamp,
@@ -186,7 +186,11 @@ TABLES['ns_ordenes_cabecera'] = (
            nombre               varchar(300),
            email                varchar(100),
            id_tel               varchar(100),
-           internalId           varchar(100) NOT NULL
+           internalId           varchar(100) NOT NULL,
+           impuesto             float,
+           cant_lineas          int ,
+           proc_status          varchar(10),
+           proc_descr           varchar(10000)
 
             )
 
@@ -318,7 +322,7 @@ TABLES ['vi_ordenes_cab'] = (
             , ubicacion
             , tipo
             , round(importe_bruto,2) importe_bruto
-            , round(porc_descuento,2) porc_descuento
+            , cod_descuento
             , round(importe_descuento,2) importe_descuento 
             , creador
             , DATE_FORMAT(fecha_creacion2,'%Y-%m-%d') fecha_creacion2
