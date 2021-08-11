@@ -58,6 +58,7 @@ class vResumenOrdenesActual(db.Model):
     monto = db.Column(db.Integer)
     clientes = db.Column(db.Integer)
 
+## TABLAS REFLEJADAS
 
 class VentasPendientes (db.Model):
     #reflejando la vista 
@@ -65,6 +66,18 @@ class VentasPendientes (db.Model):
                            , db.Column('rcp_pedido',  primary_key=True)
                            , autoload_with=db.engine
                    )
+
+class OrdenesCabecera(db.Model):
+    __table__ = db.Table('ns_ordenes_cabecera', db.metadata
+                    , db.Column('internalId', primary_key=True)
+                    , autoload_with=db.engine)
+
+class OrdenesDetalle(db.Model):
+    __table__ = db.Table('ns_ordenes_detalle', db.metadata
+                    , db.Column('num_documento', primary_key=True)
+                    , db.Column('linea', primary_key=True)
+                    , autoload_with=db.engine)
+
 
 class Registro (db.Model):
     #reflejando la vista 
