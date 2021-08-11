@@ -4,6 +4,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO, emit
+from datetime import datetime 
 
 # Config
 from .config import DevConfig, TestConfig
@@ -18,9 +19,19 @@ db = SQLAlchemy()
 
 socketio = SocketIO(async_mode='threading')
 
+
+
 # Factory
 def init_app():
     app = Flask(__name__)
+
+    #----INI: Se definen filtros
+    @app.template_filter()
+    def strftime(date, fmt=None):
+        format='%Y-%m-%d'
+        return date.strftime(format) 
+    #----FIN: Se definen filtros
+
     app.config.from_object(TestConfig)
     
     db.init_app(app)
@@ -43,4 +54,6 @@ def init_app():
         db.create_all()
 
         socketio.init_app(app)
+
+
         return app 

@@ -8,130 +8,128 @@
 
 
 <div class="level">
-    <div class="level-left">
-      <div class="level-item">
-          <div class="title">&Oacute;rdenes de Venta</div>
-      </div>
+  <div class="level-left">
+    <div class="level-item">
+      <div class="title">&Oacute;rdenes de Venta</div>
     </div>
   </div>
+</div>
 
-  <div class="columns is-multiline">
+<div class="columns is-multiline">
 
-    <div class="column">
-      <div class="box">
-        <div class="heading">Cantidad</div>
-        <div class="title" id="act_cantidad">{{ "{:,.0f}".format(datos.cantidad or 0) }}</div>
-        <div class="level">
-          <div class="level-item">
-            <div class="">
-              <div class="heading">Lineas de Detalle</div>
-              <div class="title is-5" id="act_lineas">{{ datos.lineas or 0 }}</div>
-            </div>
+  <div class="column">
+    <div class="box">
+      <div class="heading">Cantidad</div>
+      <div class="title" id="act_cantidad">{{ "{:,.0f}".format(datos.cantidad or 0) }}</div>
+      <div class="level">
+        <div class="level-item">
+          <div class="">
+            <div class="heading">Lineas de Detalle</div>
+            <div class="title is-5" id="act_lineas">{{ datos.lineas or 0 }}</div>
           </div>
-          <div class="level-item">
-            <div class="">
-              <div class="heading">Clientes</div>
-              <div class="title is-5" id="act_clientes">{{datos.clientes or 0}}</div>
-            </div>
+        </div>
+        <div class="level-item">
+          <div class="">
+            <div class="heading">Clientes</div>
+            <div class="title is-5" id="act_clientes">{{datos.clientes or 0}}</div>
           </div>
-          <div class="level-item">
-            <div class="">
-              <div class="heading">Ubicaciones</div>
-              <div class="title is-5" id="act_ubicaciones">{{datos.ubicaciones or 0}}</div>
-            </div>
+        </div>
+        <div class="level-item">
+          <div class="">
+            <div class="heading">Ubicaciones</div>
+            <div class="title is-5" id="act_ubicaciones">{{datos.ubicaciones or 0}}</div>
           </div>
-          <div class="level-item">
-            <div class="">
-              <div class="heading">Monto</div>
-              <div class="title is-5" id="act_monto">{{ "${:,.2f}".format(datos.monto or 0)  }}</div>
-            </div>
-          </div>
+        </div>
+        <div class="level-item">
+          <div class="">
+            <div class="heading">Monto</div>
+            <div class="title is-5" id="act_monto">{{ "${:,.2f}".format(datos.monto or 0) }}</div>
           </div>
         </div>
       </div>
     </div>
-   
-  
-
-  <div class="field">
-    <p class="control">
-      <!--form action="/items"-->
-        <button  id="procesar" class="button is-success">
-           Descargar
-        </button>
-    <!--/form-->
-    </p>
-    <p id="mensajes"></p>
   </div>
+</div>
 
 
 
-  <div class="section" id="tabla_err">
+<div class="field">
+  <p class="control">
+    <!--form action="/items"-->
+    <button id="procesar" class="button is-success">
+      Descargar
+    </button>
+    <!--/form-->
+  </p>
+  <p id="mensajes"></p>
+</div>
+
+
+
+<div class="section" id="tabla_err">
 
   <!--tabs-->
   <div class="tabs is-small is-boxed ">
     <ul>
-      <li class="{% if tab == 1 %} is-active {% endif %}" >  
-          <a href="{{ url_for('main_bp.orders', tab=1) }}">Validos</a>
+      <li class="{% if tab == 1 %} is-active {% endif %}">
+        <a href="{{ url_for('main_bp.orders', tab=1) }}">Válidos</a>
       </li>
       <li class="{% if tab == 2 %} is-active {% endif %}">
-          <a href="{{ url_for('main_bp.orders', tab=2) }}">Errores</a>
+        <a href="{{ url_for('main_bp.orders', tab=2) }}">Errores</a>
       </li>
     </ul>
   </div>
 
 
-    <!--h2 class="subtitle is-4">{{ tabla.total}} ORDENES CON ERRORES DE VALIDACION:</h2-->
+  <!--h2 class="subtitle is-4">{{ tabla.total}} ORDENES CON ERRORES DE VALIDACION:</h2-->
 
-    <!--INI Pagination Links -->
+  <!--INI Pagination Links -->
 
-    <nav class="pagination" role="pagination">
-        
-      <a  href="{{ url_for('main_bp.orders', page=tabla.prev_num) }}"
-        class="pagination-previous
-        {% if tabla.page == 1 %}disabled{% endif %}">
-          &laquo; Ant
-      </a>
+  <nav class="pagination" role="pagination">
 
-      <!-- Loop through the number of pages to display a link for each-->
+    <a href="{{ url_for('main_bp.orders', page=tabla.prev_num) }}" class="pagination-previous"
+        {% if tabla.page == 1 %} disabled {% endif %}>
+      &laquo; Ant
+    </a>
 
-      <ul class="pagination-list">
+    <a href="{{ url_for('main_bp.orders', page=tabla.next_num) }}" class="pagination-next" 
+        {% if tabla.page == tabla.pages %} disabled {% endif %} >
+      &raquo; Sig
+    </a>
 
-        {% for page_num in tabla.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-        {% if page_num %}
-        <li>
-                <!-- Check for the active page and set the link to "Active"-->
-                {% if tabla.page == page_num %}
-                <a class="pagination-link is-current" href="{{ url_for('main_bp.orders', page=page_num) }}"
-                  class="btn btn-dark">
-                    {{ page_num }}
-                </a>
-                {% else %}
-                <a class="pagination-link" href="{{ url_for('main_bp.orders', page=page_num) }}"
-                  class="btn btn-outline-dark">
-                    {{ page_num }}
-                </a>
-                {% endif %}
-            {% else %}
-            <span class="pagination-ellipsis">&hellip;</span>
+    <!-- Loop through the number of pages to display a link for each-->
+
+    <ul class="pagination-list">
+
+      {% for page_num in tabla.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+      {% if page_num %}
+      <li>
+        <!-- Check for the active page and set the link to "Active"-->
+        {% if tabla.page == page_num %}
+        <a class="pagination-link is-current" href="{{ url_for('main_bp.orders', page=page_num) }}"
+          class="btn btn-dark">
+          {{ page_num }}
+        </a>
+        {% else %}
+        <a class="pagination-link" href="{{ url_for('main_bp.orders', page=page_num) }}" class="btn btn-outline-dark">
+          {{ page_num }}
+        </a>
         {% endif %}
-        </li>
-        {% endfor %}
-        <li> 
-          <span  > &nbsp;&nbsp;&nbsp;  {{ tabla.total }} Registros </span>
-        </li>
-      </ul>
+        {% else %}
+        <span class="pagination-ellipsis">&hellip;</span>
+        {% endif %}
+      </li>
+      {% endfor %}
+      <li>
+        <span> &nbsp;&nbsp;&nbsp; {{ tabla.total }} Registros </span>
+      </li>
+    </ul>
 
-      <a href="{{ url_for('main_bp.orders', page=tabla.next_num) }}"
-        class="pagination-next 
-        {% if tabla.page == tabla.pages %}disabled{% endif %}">
-          &raquo; Sig
-      </a>
 
-    </nav>
- 
+  </nav>
 
-    <!--FIN Pagination Links-->
+
+  <!--FIN Pagination Links-->
 
 
   <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
@@ -153,53 +151,53 @@
       </tr>
       {% endfor %}
     </tbody>
-  </table>  
+  </table>
   <h2 class="subtitle is-5">
     Mostrando página {{ tabla.page }} de {{ tabla.pages }}
-    </h2>
+  </h2>
 
 </div>
 
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-  <script type="text/javascript" charset="utf-8">
-      var socket = io.connect('http://' + document.domain + ':' + location.port);
-  
-      let button = document.getElementById('procesar');
-      let mensajes = document.getElementById("mensajes");
-   
-      button.addEventListener('click', () => {
-        mensajes.innerHTML = "" ;
-        socket.emit('proceso', {data: 'orders'}); 
-      });
-  
-      socket.on('orders.procesando', function (data) {
-            
-            x = JSON.parse(data).data
-            button.disabled = true ;
-            document.body.style.cursor = 'wait';
-            document.getElementById('act_cantidad').innerHTML = x.cantidad ;
-            document.getElementById('act_lineas').innerHTML = x.lineas ;
-            document.getElementById('act_monto').innerHTML = ".." ;
-            document.getElementById('act_clientes').innerHTML = ".." ;
-            document.getElementById('act_ubicaciones').innerHTML = ".." ;
-            document.getElementById('tabla_err').innerHTML = ""
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+  var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-      })
+  let button = document.getElementById('procesar');
+  let mensajes = document.getElementById("mensajes");
 
-      socket.on('orders.mensajes', function (data) {
-        mensajes.innerHTML += "<br>" + JSON.parse(data).data
-      });
+  button.addEventListener('click', () => {
+    mensajes.innerHTML = "";
+    socket.emit('proceso', { data: 'orders' });
+  });
 
-      socket.on('orders.procesado', function (data) {
-        mensajes.innerHTML += "<br>" + JSON.parse(data).data ;
-        button.disabled = false;
-        document.body.style.cursor = 'default';
-        setTimeout(() => {  window.location.reload(); }, 2000); //mil milisegundos = 1 segundo
-        
-      });
-      
+  socket.on('orders.procesando', function (data) {
 
-  </script>
+    x = JSON.parse(data).data
+    button.disabled = true;
+    document.body.style.cursor = 'wait';
+    document.getElementById('act_cantidad').innerHTML = x.cantidad;
+    document.getElementById('act_lineas').innerHTML = x.lineas;
+    document.getElementById('act_monto').innerHTML = "..";
+    document.getElementById('act_clientes').innerHTML = "..";
+    document.getElementById('act_ubicaciones').innerHTML = "..";
+    document.getElementById('tabla_err').innerHTML = ""
+
+  })
+
+  socket.on('orders.mensajes', function (data) {
+    mensajes.innerHTML += "<br>" + JSON.parse(data).data
+  });
+
+  socket.on('orders.procesado', function (data) {
+    mensajes.innerHTML += "<br>" + JSON.parse(data).data;
+    button.disabled = false;
+    document.body.style.cursor = 'default';
+    setTimeout(() => { window.location.reload(); }, 2000); //mil milisegundos = 1 segundo
+
+  });
 
 
-  {% endblock %}
+</script>
+
+
+{% endblock %}

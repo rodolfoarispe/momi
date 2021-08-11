@@ -47,14 +47,13 @@
           <div class="level-item">
             <div class="">
               <div class="heading">Monto</div>
-              <div class="title is-5" id="ant_monto">{{ "${:,.2f}".format(antes.monto) }}</div>
+              <div class="title is-5" id="ant_monto">{{ "{:,.2f}".format(antes.monto) }}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    {% if True %}
 
     <div class="column">
       <div class="box">
@@ -76,22 +75,19 @@
           <div class="level-item">
             <div class="">
               <div class="heading">Monto</div>
-              <div class="title is-5" id="ant_monto">{{ actual.monto  }}</div>
+              <div class="title is-5" id="ant_monto">{{ "{:,.2f}".format(actual.monto) or 0 }}</div>
             </div>
           </div>
           <div class="level-item">
             <div class="">
               <div class="heading">Fecha</div>
-              <div class="title is-5" id="ant_fec">{{ "%Y-%m-%d".format(actual.fec) }}</div>
+              <div class="title is-5" id="ant_fec">{{ actual.fec | strftime }}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-  {% else %}
-  <div class="column"></div>
-  {% endif %}
   
   </div>
 
@@ -106,6 +102,102 @@
     </p>
     <p id="mensajes"></p>
   </div>
+
+  
+  <div class="section" id="tabla_err">
+
+    <!--tabs-->
+    <div class="tabs is-small is-boxed ">
+      <ul>
+        <li class="{% if tab == 1 %} is-active {% endif %}" >  
+            <a href="{{ url_for('main_bp.cash', tab=1) }}">Pendientes</a>
+        </li>
+        <li class="{% if tab == 2 %} is-active {% endif %}">
+            <a href="{{ url_for('main_bp.cash', tab=2) }}">Aceptados</a>
+        </li>
+        <li class="{% if tab == 3 %} is-active {% endif %}">
+          <a href="{{ url_for('main_bp.cash', tab=3) }}">Rechazados</a>
+      </li>
+    </ul>
+    </div>
+
+     <!--INI Pagination Links -->
+
+     <nav class="pagination" role="pagination">
+        
+      <a  href="{{ url_for('main_bp.cash', page=tabla.prev_num) }}"
+        class="pagination-previous"
+        {% if tabla.page == 1 %} disabled {% endif %}>
+          &laquo; Ant
+      </a>
+
+      <a href="{{ url_for('main_bp.cash', page=tabla.next_num) }}"
+        class="pagination-next" 
+        {% if tabla.page == tabla.pages or tabla.pages==0 %} disabled {% endif %}>
+          &raquo; Sig
+      </a>
+
+      <!-- Loop through the number of pages to display a link for each-->
+      <ul class="pagination-list">
+
+        {% for page_num in tabla.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+        <li>
+                <!-- Check for the active page and set the link to "Active"-->
+                {% if tabla.page == page_num %}
+                <a class="pagination-link is-current" href="{{ url_for('main_bp.cash', page=page_num) }}"
+                  class="btn btn-dark">
+                    {{ page_num }}
+                </a>
+                {% else %}
+                <a class="pagination-link" href="{{ url_for('main_bp.cash', page=page_num) }}"
+                  class="btn btn-outline-dark">
+                    {{ page_num }}
+                </a>
+                {% endif %}
+            {% else %}
+            <span class="pagination-ellipsis">&hellip;</span>
+        {% endif %}
+        </li>
+        {% endfor %}
+        <li> 
+          <span  > &nbsp;&nbsp;&nbsp;  {{ tabla.total }} Registros </span>
+        </li>
+      </ul>
+
+
+    </nav>
+ 
+
+    <!--FIN Pagination Links-->
+   
+
+    <!-- tabla de detalle-->
+    <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th width="20%">Num. Pedido</th>
+          <th>Resultado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in tabla.items %}
+        <tr>
+          <td>{{item[1]}}</td>
+          <td>{{item.reg_resultado | e }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>  
+
+    {% if page_num %}
+    <h2 class="subtitle is-5">
+      Mostrando página {{ tabla.page }} de {{ tabla.pages }}
+      </h2>  
+    {% endif %}
+  </div>
+  
+</div>
 
 
 

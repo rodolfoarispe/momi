@@ -78,6 +78,19 @@ class OrdenesDetalle(db.Model):
                     , db.Column('linea', primary_key=True)
                     , autoload_with=db.engine)
 
+class rcPedidos(db.Model):
+    __table__ = db.Table('rcpedidos', db.metadata
+                , db.Column('rcp_cia', primary_key=True)
+                , db.Column('rcp_pedido', primary_key=True)
+                , autoload_with=db.engine)
+
+class rdPedidos(db.Model):
+    __table__ = db.Table('rdpedidos', db.metadata
+                , db.Column('rdp_cia', primary_key=True)
+                , db.Column('rdp_pedido', primary_key=True)
+                , db.Column('rdp_linea', primary_key=True)
+                , autoload_with=db.engine)
+
 
 class Registro (db.Model):
     #reflejando la vista 

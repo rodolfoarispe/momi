@@ -1,15 +1,15 @@
 from flask import Blueprint, render_template, request, redirect
 #from flask import current_app as app
 
-from sqlalchemy import Table, Column, Integer, func, sql
+from sqlalchemy import Table, Column, Integer, func, sql, and_
 
 
 from datetime import datetime
 
 import sqlalchemy
 
-from ..models import OrdenesCabecera, Todo, vResumenItemActual, vResumenItemAnterior , VentasPendientes, Registro
-from ..models import vResumenOrdenesActual
+from ..models import OrdenesCabecera, Todo, vResumenItemActual, vResumenItemAnterior , Registro
+from ..models import vResumenOrdenesActual, rcPedidos, rdPedidos
 
 from .. import db
 
@@ -112,39 +112,64 @@ def orders():
 @main_bp.route('/cash', methods=['GET', 'POST'])
 def cash():
 
-    #TODO: mejorar en un solo query
-    resumen = db.session.query( func.count(VentasPendientes.rcp_pedido).label('cantidad'), 
-                             func.sum(VentasPendientes.rcp_monto).label('monto'),
-                             ).first()
+    ROWS_PER_PAGE = 20
+    page = request.args.get('page',1, type=int)
+    tab = request.args.get('tab', 1, type=int)    
+
+    # INI: se construyen los queries
+    ped_reg = db.session.query(rcPedidos, Registro).join(Registro, and_ (rcPedidos.rcp_cia == Registro.rcp_cia   
+                                                , rcPedidos.rcp_pedido == Registro.rcp_pedido), 
+                                                isouter=True ).subquery()  
+
+    q1 = db.session.query(ped_reg).filter(ped_reg.c.reg_estatus==None).subquery() #pendientes
+    q2 = db.session.query(ped_reg).filter(ped_reg.c.reg_estatus=='OK').subquery() #aceptados
+    q3 = db.session.query(ped_reg).filter(ped_reg.c.reg_estatus=='KO').subquery() #rechazados
+    q4 = db.session.query(ped_reg).filter(ped_reg.c.reg_estatus!=None).subquery() #procesados
+
+    # INI: se construyen los queries
+
+    resumen = db.session.query(func.count(q1.c.rcp_pedido).label('cantidad'), 
+                               func.sum(q1.c.rcp_monto).label('monto')
+                               ).one_or_none()
 
     totl = resumen.cantidad or 0
     monto = resumen.monto or 0
-    facs = db.session.query(VentasPendientes.rcp_pedido).filter(VentasPendientes.rcp_salida=='FA').count()
-    devs = db.session.query(VentasPendientes.rcp_pedido).filter(VentasPendientes.rcp_salida=='NC').count()
+
+    facs = db.session.query(q1).filter(q1.c.rcp_salida == 'FA').count()
+    devs = db.session.query(q1).filter(q1.c.rcp_salida == 'NC').count()
     otrs = totl-facs-devs    
 
     antes = { 'totl':totl, 'facs':facs, 'devs':devs, 'otrs':otrs, 'monto':monto}
 
+    #ok = db.session.query(Registro.rcp_pedido).filter(Registro.reg_estatus=='OK').count()
+    ok  = db.session.query(q2).count()
+    #ko = db.session.query(Registro.rcp_pedido).filter(Registro.reg_estatus=='KO').count()
+    ko  = db.session.query(q3).count()
+    fec = db.session.query(func.max(Registro.reg_fecha_modificacion).label('fec')).one_or_none().fec
 
-    ok = db.session.query(Registro.rcp_pedido).filter(Registro.reg_estatus=='OK').count()
-    ko = db.session.query(Registro.rcp_pedido).filter(Registro.reg_estatus=='KO').count()
-    fec = db.session.query(func.max(Registro.reg_fecha_modificacion).label('fec')).one_or_none()
+    
+    qry = None
+    if tab ==1: qry = q1
+    if tab ==2: qry = q2 
+    if tab ==3: qry = q3 
+    
 
-    print('respuesta... ', type(fec))
+    tabla = db.session.query(qry).order_by(qry.c.reg_fecha_creacion).paginate(page=page, per_page=ROWS_PER_PAGE)    
 
-    #print ('valor de respuesta...',fec.strftime("%Y-%m-%d %H:%M:%S.%f"))
+    mnt = db.session.query(func.sum(q4.c.rcp_monto).label('mnt')).one_or_none().mnt
 
     procs = ok+ko
     pends = totl - procs
     
-    actual = { 'totl':procs, 'facs':ok, 'devs':ko, 'otrs':0, 'fec':fec}
-    fec2 = db.session.query()
+    actual = { 'totl':procs, 'facs':ok, 'devs':ko, 'otrs':0,  'monto':mnt, 'fec':fec}
+    #fec2 = db.session.query()
+
 
     if request.method == "POST":
         pass
         #task.content = request.form['content']
     else:
-        return render_template('venta_contado.html', antes=antes, actual=actual, flag=False)
+        return render_template('venta_contado.html', antes=antes, actual=actual, tabla=tabla, page=page, tab=tab, flag=False)
 
 
 @main_bp.route('/credit', methods=['GET', 'POST'])
