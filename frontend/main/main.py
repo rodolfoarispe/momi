@@ -90,14 +90,22 @@ def orders():
     ROWS_PER_PAGE = 20
 
     page = request.args.get('page',1, type=int)
+    tab = request.args.get('tab', 1, type=int)
  
     resumen = vResumenOrdenesActual().query.first_or_404()
-    tabla = db.session.query(OrdenesCabecera).filter(OrdenesCabecera.proc_status=="KO").order_by(OrdenesCabecera.fecha.desc()).paginate(page=page, per_page=ROWS_PER_PAGE)    
+
+    tabla = None 
+
+    if tab==1:
+       tabla = db.session.query(OrdenesCabecera).filter(OrdenesCabecera.proc_status=="ok").order_by(OrdenesCabecera.fecha.desc()).paginate(page=page, per_page=ROWS_PER_PAGE)    
+
+    if tab==2:
+       tabla = db.session.query(OrdenesCabecera).filter(OrdenesCabecera.proc_status=="KO").order_by(OrdenesCabecera.fecha.desc()).paginate(page=page, per_page=ROWS_PER_PAGE)    
 
     if request.method == "POST":
         pass
     else:
-        return render_template('ordenes.html', datos=resumen, tabla=tabla)
+        return render_template('ordenes.html', datos=resumen, tabla=tabla, tab=tab)
 
 
 
