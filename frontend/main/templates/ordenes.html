@@ -64,10 +64,23 @@
     <p id="mensajes"></p>
   </div>
 
-  {% if tabla.total > 0 %}
 
   <div class="section" id="tabla_err">
-    <h2 class="subtitle is-4">{{ tabla.total}} ORDENES CON ERRORES DE VALIDACION:</h2>
+
+  <!--tabs-->
+  <div class="tabs is-small is-boxed ">
+    <ul>
+      <li class="{% if tab == 1 %} is-active {% endif %}" >  
+          <a href="{{ url_for('main_bp.orders', tab=1) }}">Validos</a>
+      </li>
+      <li class="{% if tab == 2 %} is-active {% endif %}">
+          <a href="{{ url_for('main_bp.orders', tab=2) }}">Errores</a>
+      </li>
+    </ul>
+  </div>
+
+
+    <!--h2 class="subtitle is-4">{{ tabla.total}} ORDENES CON ERRORES DE VALIDACION:</h2-->
 
     <!--INI Pagination Links -->
 
@@ -103,6 +116,9 @@
         {% endif %}
         </li>
         {% endfor %}
+        <li> 
+          <span  > &nbsp;&nbsp;&nbsp;  {{ tabla.total }} Registros </span>
+        </li>
       </ul>
 
       <a href="{{ url_for('main_bp.orders', page=tabla.next_num) }}"
@@ -128,7 +144,11 @@
       {% for item in tabla.items %}
       <tr>
         <td>{{item.num_documento}}</td>
-        <td>{{item.proc_descr}}</td>
+        {% if item.proc_status == 'ok' %}
+        <td> Orden OK</td>
+        {% else %}
+        <td>{{ item.proc_descr | e }}</td>
+        {% endif %}
       </tr>
       {% endfor %}
     </tbody>
@@ -136,7 +156,6 @@
   <h2 class="subtitle is-5">
     Mostrando página {{ tabla.page }} de {{ tabla.pages }}
     </h2>
-  {% endif %}
 
 </div>
 
