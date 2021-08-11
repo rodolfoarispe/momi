@@ -8,8 +8,9 @@ from flask_socketio import SocketIO, emit
 # Config
 from .config import DevConfig, TestConfig
 
-import procesar_items as proc_items
+import procesar_items as   proc_items
 import procesar_ordenes as proc_orders
+import validar_ordenes as  check_orders
 
 # Globals
 

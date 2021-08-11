@@ -8,7 +8,7 @@ from datetime import datetime
 
 import sqlalchemy
 
-from ..models import Todo, vResumenItemActual, vResumenItemAnterior , VentasPendientes, Registro
+from ..models import OrdenesCabecera, Todo, vResumenItemActual, vResumenItemAnterior , VentasPendientes, Registro
 from ..models import vResumenOrdenesActual
 
 from .. import db
@@ -87,13 +87,17 @@ def items():
 @main_bp.route('/orders', methods=['GET', 'POST'])
 def orders():
 
-    
-    tabla = vResumenOrdenesActual().query.first_or_404()
+    ROWS_PER_PAGE = 20
+
+    page = request.args.get('page',1, type=int)
+ 
+    resumen = vResumenOrdenesActual().query.first_or_404()
+    tabla = db.session.query(OrdenesCabecera).filter(OrdenesCabecera.proc_status=="KO").order_by(OrdenesCabecera.fecha.desc()).paginate(page=page, per_page=ROWS_PER_PAGE)    
 
     if request.method == "POST":
         pass
     else:
-        return render_template('ordenes.html', datos=tabla)
+        return render_template('ordenes.html', datos=resumen, tabla=tabla)
 
 
 

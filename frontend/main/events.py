@@ -5,6 +5,7 @@ from .. import socketio
 
 from .. import proc_items
 from .. import proc_orders
+from .. import check_orders
 
 @socketio.on('proceso')
 def handle_my_custom_event(input_json):
@@ -28,8 +29,10 @@ def handle_my_custom_event(input_json):
         emit ('orders.mensajes', json.dumps({'data': txt}) ) 
 
         x = proc_orders.main(socketio)
+        y = check_orders.main(socketio)
 
         socketio.start_background_task(target=x)  
+        socketio.start_background_task(target=y)  
         
         #time.sleep(5)
         emit ('orders.procesado', json.dumps({'data':'Proceso Terminado!<br>La p&aacute;gina se refresacar&aacute; en segundos' }) )
