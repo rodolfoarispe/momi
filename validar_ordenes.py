@@ -65,7 +65,8 @@ def main(socket=None):
 
   logger.info('Crendo cliente para MySQL')
   clienteMomi = DataBaseClient(connect=True) 
-  #util.transmitir(socket, 'orders.mensajes', 'Conexión a MySQL... OK')
+  util.transmitir(socket, 'orders.mensajes', 'Inicia proceso de Validación de las ordenes')
+  util.transmitir(socket, 'orders.mensajes', 'Conexión a MySQL... OK')
 
   clienteMomi.connection.autocommit = True #queremos que insert cada sentencia ejecutada      
 
@@ -77,7 +78,7 @@ def main(socket=None):
   cursor1 = clienteMomi.cursor
   cursor2 = clienteMomi.getCursor()
 
-  #util.transmitir(socket, 'orders.mensajes', 'Cargando los datos...')
+  util.transmitir(socket, 'orders.mensajes', 'Revisando las ordenes...')
 
 
   query1 =  """
@@ -112,6 +113,7 @@ def main(socket=None):
       # =============
 
       #validar duplicados
+
       cursor2.execute(" select count(*) from ns_ordenes_cabecera where num_documento = '{}' ".format(num_doc))
       if cursor2.fetchone()[0] >1:
           p_err.append( 'Cabecera con numero de documento duplicado') 
@@ -124,7 +126,7 @@ def main(socket=None):
 
       if lineas == 0:
         p_err.append( 'La cabecera no tiene lineas de detalle') 
-      
+
       if abs(bruto - total) > 0.01:
         p_err.append('Total de la cabecera difiere del total del detalle')
 
@@ -155,6 +157,7 @@ def main(socket=None):
       logger.info('Procesado el registro {} con num.doc {} -> {}'.format(cont_cabecera, num_doc, p_stat))
 
   logger.info('Termina el proceso de validación')
+  util.transmitir(socket, 'orders.mensajes', 'Terminó el proceso de validación!')
 
 if __name__ == "__main__":
    main()
