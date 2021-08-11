@@ -116,7 +116,7 @@ def main(socket=None):
 
       cursor2.execute(" select count(*) from ns_ordenes_cabecera where num_documento = '{}' ".format(num_doc))
       if cursor2.fetchone()[0] >1:
-          p_err.append( 'Cabecera con numero de documento duplicado') 
+          p_err.append( 'ERR01- Cabecera con numero de documento duplicado') 
 
       #validar monto y lineas
       cursor2.execute ("select count(*) cant, sum(importe_bruto) monto from ns_ordenes_detalle where num_documento ='{}'".format(num_doc) )
@@ -125,18 +125,18 @@ def main(socket=None):
       bruto = res[1]
 
       if lineas == 0:
-        p_err.append( 'La cabecera no tiene lineas de detalle') 
+        p_err.append('ERR01: La cabecera no tiene lineas de detalle') 
 
       if abs(bruto - total) > 0.01:
-        p_err.append('Total de la cabecera difiere del total del detalle')
+        p_err.append('ERR02: Total de la cabecera difiere del total del detalle')
 
 
       # validaciones temporales
       if fecha < datetime(2021,6,1):
-         p_err.append('Anterior a la fecha de corte de prueba (jul.21')
+         p_err.append('ERR03: Anterior a la fecha de corte de prueba (jul.21)')
 
       if creador != '39611':
-        p_err.append('No fue creado por usuario de pruebas (Adan Rueda')
+        p_err.append('ERR04: No fue creado por usuario de pruebas (39611)')
 
       # ==================
       
