@@ -1,34 +1,63 @@
-### SISTEMA DE INTEGRACION MOMI - NETSUITE
-# Programa para la integración de informacion de ventas provenientes de los POS y que son enviados via el API de Netsuite a la instancia de Momi en la nube.
+### SISTEMA DE INTEGRACION MOMI - NETSUITE ERP
+# Programa para la integración de transacciones de ventas provenientes de los POS y que son enviados via API de Netsuite a la instancia de Momi en la nube.
 
-## Descripción
-El sistema está compuesto de un packete (netsuite) responsable de establecer una conexión coherente con netsuite desde un punto común.  Las entidades a transferir así como la adecuación de sus campos antes de la trasnferencia se realiza en un paquete separado (momi)
+## Descripción General
+El propósito del sistema es proveer una interface que permita que algunas transacciones que ocurren en el POS, puedan registrarse via web API en el ERP Netsuite.  El sistema está desarrollando en lenguaje Python y contiene módulos responsables de establecer una conexión coherente con la plataforma Netsuite en la nube. 
 
-El proceso de transferenecia de cada una las transacciones se estructuró en 4 archivos que atienden de manera individual los temas funcionales relacionados al proceso.  Esto con el fin de lograr mayor claridad del código:
+![Diagrama Funcional](diag1.png)
+
+El proceso de transferenecia de cada una las Transacciones está dividido en módulos funcionales relacionados a cada etapa del proceso.  La nomenclatura de los archivos utiliza el nombre de la transacción seguido de un sufijo que indica la función que realiza el módulo:
 
 - bucle de transferencia (xxx_buc.py)
-- lectura desde la fuente (xxx_get.py)
+- lectura del origen (xxx_get.py)
 - grabación en el destino (xxx_put.py)
 - registro del resultado de la operación (xxx_reg.py)
 
+Adicionalmente se tiene rutinas de soporte para las descargas de consultas guardadas en el ERP.  Esto, con el fin de obtener los datos necesarios para que el POS procese las transacciones en concordancia con el ERP:
+- Descarga de la consulta guardada de artículos (procecsar_items.py)
+- Descarga de la consulta guardada de Ordenes de Venta (procesar_ordenes.py)
 
-## Paquete momi:
+## Descripción de los paquetes:
+
+### Paquete momi:
 En este paquete es responsable de homologar las clases entre ambos sistemas y por tanto es capaz de tomar la estructura fuente y prepararla para ser enviadas a Netsuite (equivalencias). En el caso de la venta en efectivo por ejemplo, se define una clase cabecera y otra clase detalle y se incluyen los campos de interés necesarios para lograr una transferencia exitosa.
+- client.py:  define una clase global ClientDb que responsable de la conexión con la base de datos MySQL
+- utility.py: rutinas genericas que realizan funciones de servicio al resto de los modulos
+- t_cabecera.py: modelo unificado de la cabecera de la venta contado para ser usado entre el POS  y ERP
+- t_detalle.py: modelo unificado del detalle de la venta contado para ser usado entre el POS y el ERP
 
-## Paquete netsuite:
+
+### Paquete netsuite:
 Este paquete ha sido dividido en areas funcionales:
 - client.py:  define una clase global NetSuiteClient que contiene el cliente HTTP y un generador de tokens
 - commands.py: define las rutinas según las funciones API de netsuite, como por ejemplo upsert y search
 - credenciales.py:  define una clase comun Credenciales donde están predefinidos los valores necesarios para generar las conexiones mediante Token Based Authentication (TBA)
 - utilidades.py: rutinas genericas que realizan funciones de servicio al resto de los modulos
 
+## Puntos de entrada al sistema (Entry Points)
+Los programas pueden ejecutarse desde la línea de comandos del sistema operativo:
+
+Inicializar la base de datos y crear las tablas y vistas.  Este proceso no recrea ninguna tabla por lo que tiene que eliminarse manualmente antes.  Sin embargo si recrea las vistas y los procedimientos almacenados en el definidos.
+
+> python crearDb.py
+
+Ejecutar el proceso de monitoreo y envio de las ventas contados en un bucle:
+> python venta_contado_buc.py 
+
+Ejecutar el proceso de descarga de items: 
+> python procesar_items.py
+
+Ejecutar el proceso de descarga de ordenes de venta:
+> python procesar_ordenes.py
+
+Iniciar el servidor web para la ejecución de las tareas en modo gráfico:
+> python wsgi.py
+
+![Diagrama Funcional](web1.png)
+
 ## Requerimientos técnicos:
-Python 3.9
-
-
-ORDEN DE VENTA:
-IMPUT5 = ID ORDEN DE VENTA
-IMPUT4 = ID DEL CIENTE DE NS (JORGE LO PONE AQUI)
+- Python 3.9 y librerias adicionales (_env/requirements.txt)
+- MySQL 8.0
 
 
 Campos que dependen del InternalId del sandbox y que el POS tiene que manejar:
@@ -67,15 +96,9 @@ SALES ORDER - CABECERA (vienen en la consulta guardada customsearch_ad_dm_sales_
 - custentity_ad_pa_control_digits
 
 
-Lista de Tareas:
-- Menu de tareas manuales - rodolfo
-- Prueba de descarga por demanda y automática
-- Check de dependencias - rodolfo - jorge
-- pruebas venta credito - rodolfo - jorge
-
-OJO: 
-- hay que trabajar en la tabla de flags para que ambos sistemas (interface y pos sepan cuando están trabajando y cuando estan en reposo)
-- marcado de ordenes cuyo articulo no existe. Tentativo revisar si es posible forzar la actualizaciónde articulos o en su defecto, solo de aquellos que no se encontraron (a partir de su id) mediante un proceso adicional 
-- Verificar como hacer que un trigger de sql dispare una sentencia en el shell.  Ejem https://stackoverflow.com/questions/33170615/call-python-script-from-mysql-trigger 
+## Funcionalidades por desarrollar 
+- Mecanismo de control como por ejemplo una tabla con flags para que ambos sistemas (interface y pos) sepan cuando están trabajando y cuando estan en reposo.  
+- Marcado de ordenes cuyo articulo no existe. Tentativo revisar si es posible forzar la actualización de articulos o en su defecto, solo de aquellos que no se encontraron (a partir de su id) mediante un proceso adicional 
+- Verificar viabilidad de uso de triggers de MySQL para que dispare acciones del shell.  Ejem https://stackoverflow.com/questions/33170615/call-python-script-from-mysql-trigger.  Nota:  revisar implicaciones de la cola de acciones y manejo de reintentos.
 
 
