@@ -50,3 +50,7 @@ class regCabecera:
         self.monto_pago1        = registro.get('rcp_impuesto1')
         self.monto_pago2        = registro.get('rcp_impuesto2')
         
+
+        #En la tabla rcpedidos se han reutilizado algunos campos para ubicar los datos de la ORDEN DE VENTA:
+        #IMPUT5 = ID ORDEN DE VENTA
+        #IMPUT4 = ID DEL CIENTE DE NS (JORGE LO PONE AQUI)
