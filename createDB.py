@@ -304,7 +304,7 @@ TABLES ['vi_ventas_pendientes'] = (
                         
                            from rcpedidos a left join registro b 
                              on a.rcp_pedido = b.rcp_pedido 
-                           where ifnull(b.reg_estatus,'NW') in ( 'NW') 
+                           where ifnull(b.reg_estatus,'NW') in ( 'NW', 'KO') 
                            order by rcp_cia, reg_fecha_modificacion asc, rcp_pedido  
    """
 )

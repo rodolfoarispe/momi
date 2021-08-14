@@ -29,25 +29,25 @@
           <div class="level-item">
             <div class="">
               <div class="heading">Ventas</div>
-              <div class="title is-5" id="ant_facs">{{ "{:,.0f}".format(antes.facs) or 0 }}</div>
+              <div class="title is-5" id="ant_facs">{{ "{:,.0f}".format(antes.facs or 0) }}</div>
             </div>
           </div>
           <div class="level-item">
             <div class="">
               <div class="heading">Reversos</div>
-              <div class="title is-5" id="ant_devs">{{ "{:,.0f}".format(antes.devs) or 0 }}</div>
+              <div class="title is-5" id="ant_devs">{{ "{:,.0f}".format(antes.devs or 0) }}</div>
             </div>
           </div>
           <div class="level-item">
             <div class="">
               <div class="heading">Otros</div>
-              <div class="title is-5" id="ant_otrs">{{ "{:,.0f}".format(antes.otrs) or 0 }}</div>
+              <div class="title is-5" id="ant_otrs">{{ "{:,.0f}".format(antes.otrs or 0) }}</div>
             </div>
           </div>
           <div class="level-item">
             <div class="">
               <div class="heading">Monto</div>
-              <div class="title is-5" id="ant_monto">{{ "{:,.2f}".format(antes.monto) }}</div>
+              <div class="title is-5" id="ant_monto">{{ "{:,.2f}".format(antes.monto or 0) }}</div>
             </div>
           </div>
         </div>
@@ -63,25 +63,25 @@
           <div class="level-item">
             <div class="">
               <div class="heading">Aceptado</div>
-              <div class="title is-5" id="act_facs">{{ "{:,.0f}".format(actual.facs) or 0 }}</div>
+              <div class="title is-5" id="act_facs">{{ "{:,.0f}".format(actual.facs or 0) }}</div>
             </div>
           </div>
           <div class="level-item">
             <div class="">
               <div class="heading">Rechazado</div>
-              <div class="title is-5" id="act_devs">{{ "{:,.0f}".format(actual.devs) or 0 }}</div>
+              <div class="title is-5" id="act_devs">{{ "{:,.0f}".format(actual.devs or 0) }}</div>
             </div>
           </div>
           <div class="level-item">
             <div class="">
               <div class="heading">Monto</div>
-              <div class="title is-5" id="ant_monto">{{ "{:,.2f}".format(actual.monto) or 0 }}</div>
+              <div class="title is-5" id="ant_monto">{{ "{:,.2f}".format(actual.monto or 0) }}</div>
             </div>
           </div>
           <div class="level-item">
             <div class="">
-              <div class="heading">Fecha</div>
-              <div class="title is-5" id="ant_fec">{{ actual.fec | strftime }}</div>
+              <div class="heading">Fecha</div>  
+              <div class="title is-5" id="ant_fec">{% if actual.fec %}  {{ actual.fec | strftime }} {% else %} &nbsp; {% endif %} </div>
             </div>
           </div>
         </div>
@@ -94,11 +94,17 @@
 
   <div class="field">
     <p class="control">
-      <!--form action="/items"-->
+      <!--form action="/cash"-->
         <button  id="procesar" class="button is-success">
            Procesar
         </button>
-    <!--/form-->
+        <p class="control">
+           <label class="checkbox">
+              <input id="rechazos" type="checkbox">
+                Incluir registros rechazados
+            </label>
+        </p>
+      <!--/form-->
     </p>
     <p id="mensajes"></p>
   </div>
@@ -199,6 +205,43 @@
   
 </div>
 
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+  var socket = io.connect('http://' + document.domain + ':' + location.port);
 
+  let button = document.getElementById('procesar');
+  let mensajes = document.getElementById("mensajes");
+
+
+
+  button.addEventListener('click', () => {
+    var rechazos = document.getElementById("rechazos").checked ;
+    mensajes.innerHTML = "Inicia el proceso..." ;
+    socket.emit('proceso', { data: 'cash', chk: rechazos });
+  });
+
+  socket.on('cashsale.procesando', function (data) {
+
+    x = JSON.parse(data).data
+    button.disabled = true;
+    document.body.style.cursor = 'wait';
+
+
+  })
+
+  socket.on('cashsale.mensajes', function (data) {
+    mensajes.innerHTML += "<br>" + JSON.parse(data).data
+  });
+
+  socket.on('cashsale.procesado', function (data) {
+    mensajes.innerHTML += "<br>" + JSON.parse(data).data;
+    button.disabled = false;
+    document.body.style.cursor = 'default';
+    setTimeout(() => { window.location.reload(); }, 2000); //mil milisegundos = 1 segundo
+
+  });
+
+
+</script>
 
   {% endblock %}

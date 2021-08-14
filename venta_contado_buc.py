@@ -25,17 +25,17 @@ def Procesar( grupo, socket=None):
     print ('\nCreando cliente Netsuite...', end='')
     nsClient.Connect()
     print('OK') #se crea un cliente para usarlo durante todo el bucle
-    util.transmitir(socket, 'cashsale.mensaje', 'Cliente Netsuite... OK')
+    util.transmitir(socket, 'cashsale.mensajes', 'Cliente Netsuite... OK')
     print ('Creando cliente de la Base de Datos...', end='')   
     dbClient.Connect()
     print ('OK') #se crea un cliente de la base de datos
-    util.transmitir(socket, 'cashsale.mensaje', 'Cliente MySQL... OK')
+    util.transmitir(socket, 'cashsale.mensajes', 'Cliente MySQL... OK')
 
     try:
 
         cnx = dbClient.connection 
         dbClient.cursor = buscarVentasContado(cnx, grupo) # cargas el cursor con los datos
-        util.transmitir(socket, 'cashsale.mensaje', 'Buscando registros nuevos...')
+        util.transmitir(socket, 'cashsale.mensajes', 'Buscando registros tipo {}...'.format(grupo))
 
         #if dbClient.cursor.rowcount > 0: print ('\n')
         
@@ -59,22 +59,25 @@ def Procesar( grupo, socket=None):
                          'internalId': None }
 
             if maestro.tipo_registro == 'FA':
-                pass
                 respuesta = subirVentaContado(maestro, detalle, nsClient)
 
-            if maestro.tipo_registro == 'NC':
-                pass
-                respuesta = subirDevolucionContado(maestro, detalle, nsClient)
+            else:
+                if maestro.tipo_registro == 'NC':
+                    respuesta = subirDevolucionContado(maestro, detalle, nsClient)
+                else:
+                    respuesta ['isSuccess'] = 'false'
+                    respuesta['mensajes'] = [{'tipo' :'CASHSALE', 'codigo':'ERROR', 'mensaje': 'El tipo de registros debe ser FA o NC'}]
 
             if  respuesta['isSuccess'] == 'true':
                 cont_ok += 1
             else:
                 cont_ko +=1 
 
-            util.transmitir(socket, 'orders.procesando', {'aceptados' : cont_ok, 'rechazados': cont_ko} )
+            util.transmitir(socket, 'cashsale.procesando', {'aceptados' : cont_ok, 'rechazados': cont_ko} )
 
             #-- registrar resultado
             registrarVentaContado(maestro.num_cia, maestro.num_factura, respuesta) 
+
 
         return 
         

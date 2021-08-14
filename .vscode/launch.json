@@ -16,7 +16,9 @@
             },
             "args": [
                 "run",
-                "--no-debugger"
+                "--no-debugger",
+                "--host=0.0.0.0",
+                "--port=1000"
             ],
             "jinja": true
         }
