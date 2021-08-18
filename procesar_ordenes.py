@@ -130,7 +130,7 @@ def main(socket=None):
              , nz(rec.basic, ['entity','searchValue', 'internalId'])
              , nz(rec.basic, ['tranId','searchValue'])
              , nz(rec.basic, ['item','searchValue', 'internalId']) 
-             , None #item descr
+             , nz(rec.itemJoin, ['itemId','searchValue']) #item descr
              , nz(rec.basic, ['quantity','searchValue'])
              , nz(rec.basic, ['rate','searchValue'])
              , nz(rec.basic, ['grossAmount','searchValue'])
