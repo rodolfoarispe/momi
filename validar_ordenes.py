@@ -88,6 +88,7 @@ def main(socket=None):
                 , importe_bruto
                 , fecha
                 , creador 
+                , impuesto 
             from ns_ordenes_cabecera 
             order by 2,1
 
@@ -102,9 +103,10 @@ def main(socket=None):
             
       num_id = rec[0]
       num_doc = rec[1]
-      total = rec[2]
+      total = rec[2] #importe bruto incluye el impuesto
       fecha = rec[3]
       creador = rec[4]
+      impuesto = rec[5]
 
       p_stat = 'ok'
       p_desc = ''
@@ -119,7 +121,8 @@ def main(socket=None):
           p_err.append( 'ERR01- Cabecera con numero de documento duplicado') 
 
       #validar monto y lineas
-      cursor2.execute ("select count(*) cant, sum(importe_bruto) monto from ns_ordenes_detalle where num_documento ='{}'".format(num_doc) )
+      #NOTA: en la cabecera el bruto incluye el impuesto pero en el detalle no.
+      cursor2.execute ("select count(*) cant, sum(importe_bruto+impuesto) monto from ns_ordenes_detalle where num_documento ='{}'".format(num_doc) )
       res = cursor2.fetchone()
       lineas = res[0]
       bruto = res[1]
@@ -132,7 +135,7 @@ def main(socket=None):
 
 
       # validaciones temporales
-      if fecha < datetime(2021,6,1):
+      if not ( fecha >= datetime(2021,8,18)) :
          p_err.append('ERR03: Anterior a la fecha de corte de prueba (jul.21)')
 
       if creador != '39611':
