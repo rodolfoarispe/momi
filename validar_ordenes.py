@@ -86,7 +86,7 @@ def main(socket=None):
                   internalId 
                 , num_documento 
                 , importe_bruto
-                , fecha
+                , fecha_creacion
                 , creador 
                 , impuesto 
             from ns_ordenes_cabecera 
