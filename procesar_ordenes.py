@@ -241,8 +241,9 @@ def main(socket=None):
              , nz(rec.customerMainJoin, ['internalId','searchValue', 'internalId'])
              , getCustomField(rec.basic, 'custbody_ad_pa_identification', ['searchValue'])
              , nz(rec.basic, ['dateCreated','searchValue'])             
-             , getCustomField(rec.basic, 'custbody_adc_usuario', ['searchValue','internalId'])
-             , getCustomField(rec.basic,'custbody_ad_pa_store', ['searchValue', 'internalId'])
+             , getCustomField(rec.basic, 'custbody_adc_usuario', ['searchValue', 'internalId'])
+             #, getCustomField(rec.basic,'custbody_ad_pa_store' , ['searchValue']) #lugar desde donde se hizo la venta
+             , nz(rec.basic,['location','searchValue','internalId'])
              , nz(rec.basic, ['type','searchValue'])
              , total
              , nz(rec.basic, ['promoCode','searchValue','internalId']) #tipo descuento

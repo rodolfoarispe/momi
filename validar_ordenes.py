@@ -135,8 +135,9 @@ def main(socket=None):
 
 
       # validaciones temporales
-      if not ( fecha >= datetime(2021,8,18)) :
-         p_err.append('ERR03: Anterior a la fecha de corte de prueba (jul.21)')
+      corte =  datetime(2021,8,18)
+      if not ( fecha >= corte) :
+         p_err.append('ERR03: Anterior a la fecha de corte de prueba %s' % (corte.strftime("%Y-%m-%d, %H:%M:%S")))
 
       if creador != '39611':
         p_err.append('ERR04: No fue creado por usuario de pruebas (39611)')
