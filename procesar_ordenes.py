@@ -257,9 +257,9 @@ def main(socket=None):
              , fecha_entrega
              , fecha_hora_entrega
              , nz(rec.basic, ['status','searchValue']) 
-             , getCustomField(rec.customerMainJoin,'custentity_ad_pa_id_number', ['searchValue']) #RUC
+             , getCustomField(rec.basic,'custbody_ad_pa_identification', ['searchValue']) #RUC
              , getCustomField(rec.customerMainJoin,'custentity_ad_pa_control_digits', ['searchValue']) #DV
-             , nz(rec.customerMainJoin,['altName','searchValue']) #Nombre del cliente
+             , nz(rec.customerMainJoin,['accountNumber','searchValue']) #Nombre del cliente
              , nz(rec.customerMainJoin,['email','searchValue'])
              , nz(rec.customerMainJoin,['entityId','searchValue']) #id/telefono
              , nz(rec.basic, ['taxTotal', 'searchValue'])  
