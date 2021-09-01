@@ -219,6 +219,28 @@ TABLES['ns_ordenes_detalle'] = (
 )
 
 
+TABLES['abonos'] = (
+    """
+        CREATE TABLE abonos (
+             abo_cia           varchar(100)
+           , abo_pedido        varchar(100)
+           , abo_fecha         varchar(100)
+           , abo_monto         numeric(10,2)
+           , usuario           varchar(100)
+           , fecha_registro    date
+           , hora_registro     time
+           , abo_tipo_pago     varchar(100)
+           , abo_documento     varchar(100)
+           , abo_referencia    varchar(100)
+           , abo_clase         varchar(100)
+           , abo_secuencia     int
+           , proc_status       varchar(100)
+
+        )
+
+
+    """
+)
 #------------------------  VISTAS ---------------------
 
 TABLES ['vi_rcpedidos'] = (
