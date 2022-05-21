@@ -87,14 +87,14 @@ SALES ORDER - DETALLE (viene en la consulta guardada customsearch_ad_dm_sales_or
 - custcol_ad_dm_dedication
 
 SALES ORDER - CABECERA (vienen en la consulta guardada customsearch_ad_dm_sales_order):
-- custbody_ad_pa_identification
+- custbody_ad_pa_identification (ruc)
 - custbody_adc_usuario
 - custbody_ad_pa_store
 - custbody_ad_dm_date_delivery
 - custbody_ad_pa_delivery_time
-- custentity_ad_pa_id_number
-- custentity_ad_pa_control_digits
+- custentity_ad_pa_control_digits (dv)
 
+- custentity_ad_pa_id_number  ??
 
 ## Funcionalidades por desarrollar 
 - Mecanismo de control como por ejemplo una tabla con flags para que ambos sistemas (interface y pos) sepan cuando están trabajando y cuando estan en reposo.  

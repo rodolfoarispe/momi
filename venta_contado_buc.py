@@ -12,6 +12,7 @@ from momi import utility as util
 from time import sleep
 from datetime import datetime, timedelta 
 import locale
+import sys
 
 print ('\nInterface de Integración POS-Netsuite')
 
@@ -20,6 +21,7 @@ nsClient = NetSuiteClient() #usaaremos esta conexión
 dbClient = DataBaseClient() 
 
 def Procesar( grupo, socket=None):
+
 
   
     print ('\nCreando cliente Netsuite...', end='')
@@ -85,8 +87,8 @@ def Procesar( grupo, socket=None):
         print (e)
         return False
 
-if __name__ == '__main__':
 
+def bucle():
     delta = timedelta(minutes=60) #tiempo para reintentar con los fallidos
     then = datetime(1969,2,14) #se forza una fecha del pasado la primera vez
 
@@ -103,3 +105,12 @@ if __name__ == '__main__':
             #print ('Ciclo completado.  el proceso reiniciará en un minuto...')
         print ('Entrando en modo de espera...')
         sleep(60)
+
+
+if __name__ == '__main__':
+
+    if util.existe_instancia():
+        print ('Error.  Ya se esta ejecutando una instancia del programa')
+        sys.exit()
+
+    bucle()

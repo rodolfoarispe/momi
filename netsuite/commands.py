@@ -31,8 +31,34 @@ def searchAccount(client, cuenta, token):
 
 def upsertRecord(client, registro, token ):
 
+    with client.settings(raw_response=True):
+
+        try:
+            response = client.service.upsert(record=registro, _soapheaders=token)
+        except:
+            raise 
+
+        body     = ET.fromstring(response.content)[1] 
+        status   = body.find('.//{urn:messages_2020_1.platform.webservices.netsuite.com}writeResponse')[0]
+        baseRef  = body.find('.//{urn:messages_2020_1.platform.webservices.netsuite.com}writeResponse')[1]
+        internal = baseRef.get('internalId')
+
+        estatusIsSuccess = status.get('isSuccess')
+
+        mensajes = []
+        for detail in status:      
+            statusDetailType = detail.get('type') 
+            statusDetailCode = detail[0].text if statusDetailType != None else None
+            statusDetailMessage = unescape(detail[1].text) if statusDetailType != None else None
+            mensajes.append({'isSuccess':estatusIsSuccess, 'tipo':statusDetailType, 'codigo':statusDetailCode, 'mensaje': statusDetailMessage}) 
+
+    return {'isSuccess':estatusIsSuccess, 'mensajes':mensajes, 'internalId':internal} 
+
+
+def initializeRecord(client, registro, token ):
+
     try:
-        response = client.service.upsert(record=registro, _soapheaders=token)
+        response = client.service.initialize(record=registro, _soapheaders=token)
     except:
         raise 
 
@@ -51,8 +77,6 @@ def upsertRecord(client, registro, token ):
         mensajes.append({'isSuccess':estatusIsSuccess, 'tipo':statusDetailType, 'codigo':statusDetailCode, 'mensaje': statusDetailMessage}) 
 
     return {'isSuccess':estatusIsSuccess, 'mensajes':mensajes, 'internalId':internal} 
-
-
 
 
 def itemSearch(clientNs):
@@ -128,9 +152,10 @@ def  itemCustomSearch(clientNs, searchId, pageSize=500):
  
     resp = ""
     with clientNs.client.settings(raw_response=False):
-      searchPref = clientNs.messageFactory.SearchPreferences(bodyFieldsOnly=False, pageSize=pageSize , returnSearchColumns=False )
-      clientNs.client.service.search.preferences = searchPref #TODO:  esto no parece tener efecto, en especial el pageSize
-      resp = clientNs.client.service.search(customSearch, _soapheaders=clientNs.getTokenPass())
+
+      searchPref = {'searchPreferences' : clientNs.messageFactory.SearchPreferences(bodyFieldsOnly=False, pageSize=pageSize , returnSearchColumns=True )}
+      
+      resp = clientNs.client.service.search(customSearch, _soapheaders=clientNs.getTokenPass() | searchPref)
     
 
     searchResult = resp.body.searchResult
@@ -148,14 +173,13 @@ def SearchMore(clientNs, searchId, page):
 
     return searchResult 
 
-def  Search(clientNs, searchRecordType):
+def  Search(clientNs, searchRecordType, pageSize=500):
  
     resp = ""
     with clientNs.client.settings(raw_response=False):
-      searchPref = clientNs.messageFactory.SearchPreferences(bodyFieldsOnly=False, pageSize=1000 , returnSearchColumns=True )
-      clientNs.client.service.search.preferences = searchPref
-      resp = clientNs.client.service.search(searchRecordType, _soapheaders=clientNs.getTokenPass())
-    
+      searchPref = { 'searchPreferences': clientNs.messageFactory.SearchPreferences(bodyFieldsOnly=False, pageSize=pageSize , returnSearchColumns=True ) }
+      
+      resp = clientNs.client.service.search(searchRecordType, _soapheaders=clientNs.getTokenPass() | searchPref)
 
     searchResult = resp.body.searchResult
 

@@ -1,10 +1,13 @@
 from datetime import datetime
+
+from sqlalchemy.orm import session
 import netsuite as ns
 from momi import DataBaseClient 
 import logging
 from momi import utility as util
+from momi.t_monitor import regMonitor
 
-import os
+import os, sys
 
 def nz(objeto, variables, default=None):
   resp = default
@@ -117,13 +120,25 @@ def main(socket=None):
 
   clienteMomi.connection.autocommit = True #queremos que insert cada sentencia ejecutada
 
+  #--- conexion y sesion para usar orm   
+  engine = clienteMomi.getEngine()
+  session = clienteMomi.getSession(engine) 
+
+  #--- establecer el flag de control
+
+  monitor = regMonitor('items', usuario='interface')
+  if monitor.desactivarFlag(engine, session) == False:
+      logger.info('Proceso cancelado.  Monitor indica que no está disponible')
+      sys.exit()
+
+  logger.info('Se actualizó el flag del monitor a No disponible')
+
   buscId =  'customsearch_ad_items_pos' # InternalId 418
 
   #buscId = ns.getSavedSearch(clienteNs, 'customsearch_ad_items_pos')
    
   logger.info('conectandose a netsuite - consulta %s' % buscId)
-  searchResult = ns.itemCustomSearch(clienteNs, buscId, 100)
-
+  searchResult = ns.itemCustomSearch(clienteNs, buscId, 200)
   if searchResult.status.isSuccess and searchResult.totalRecords > 0:
   
       util.transmitir(socket, 'mensajes', 'Cargando los datos...')
@@ -209,7 +224,9 @@ def main(socket=None):
 
       logger.info('Termina el ciclo de carga con el contador en %s ' % cont )
 
-      
+      if   monitor.activarFlag(engine, session):
+         logger.info('Se actualizó el flag del monitor a disponible')
+
 
 #----------------
 

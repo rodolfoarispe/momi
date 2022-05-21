@@ -21,6 +21,9 @@ class regCabecera:
         self.monto_pago2        = None
         self.nombre_pago2       = None
         self.identif_pago2      = None
+        self.id_orden           = None
+        self.formulario         = None
+
 
 
         if registro != None:
@@ -49,6 +52,7 @@ class regCabecera:
         self.metodo_pago2       = registro.get('rcp_imput2')
         self.monto_pago1        = registro.get('rcp_impuesto1')
         self.monto_pago2        = registro.get('rcp_impuesto2')
+        self.id_orden           = registro.get('rcp_imput5')
         
 
         #En la tabla rcpedidos se han reutilizado algunos campos para ubicar los datos de la ORDEN DE VENTA:

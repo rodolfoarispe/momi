@@ -5,22 +5,22 @@ import hashlib
 import hmac
 import base64
 
-CONSUMER_SECRET   = "87a296e9fdacb56b9bbc8b4afae54c01f8c5c0220341dbc6d06d67308d13106f" # (CLIENT SECRET)
-TOKEN_SECRET      = "1f49b8af9c051c8ca02f2c98afa5d2db8ad561e4d231d5f0b626272d6669351a" #"eb3f07e309752951b49cfdf96667d9caf7ab21509a89f999eb9703853a2085d8"
+CONSUMER_SECRET   = "24102f8f97973af15600be3935f5f4cf927dee3907c406a2ae2506e97d756fba" #"87a296e9fdacb56b9bbc8b4afae54c01f8c5c0220341dbc6d06d67308d13106f" # (CLIENT SECRET)
+TOKEN_SECRET      = "3ace7447837db695e3b39827d55d6c790692eb71dd2b3a3f4efd5f78ab330f01" #"eb3f07e309752951b49cfdf96667d9caf7ab21509a89f999eb9703853a2085d8"
 
 class Credentials():
 
-   NETSUITE_URL      = "https://webservices.netsuite.com/services/NetSuitePort_2020_1"
+   NETSUITE_URL      = "https://6197523-sb1.suitetalk.api.netsuite.com/services/NetSuitePort_2020_1" #"https://webservices.netsuite.com/services/NetSuitePort_2020_1"
    # para extraer el mapeo usar:  python -m zeep 'https://webservices.netsuite.com/wsdl/v2020_1_0/netsuite.wsdl' > wsdl.txt
    NETSUITE_WSDL     = "https://webservices.netsuite.com/wsdl/v2020_1_0/netsuite.wsdl" 
 
    def __init__(self):
 
         self.ACCOUNT_NUMBER    = "6197523_SB1"
-        self.APPLICATION_ID    = "3CEE6B13-4B5E-4E42-9B61-EE78889973DB"
+        self.APPLICATION_ID    = "8441E1A1-542B-475A-8C9A-F45D5670BEC5" #"565EB933-B612-4277-A72B-5EFBD18DD936"
         self.NAME              = "Momi - Sandbox"
-        self.CONSUMER_KEY      = "f25b76eb5b1851c75ac39e692a685dbe7f60842e362c43e6c4e53c35635371cc" # (CLIENT ID)
-        self.TOKEN_ID          = "135a8997d02ff3bfc6daf555587b1fd4f3dd95a31e3642c3d43460d43c9f2ca6" #"566941115f6634f3a8e7ac9c4d580cd80042f176c560c2ee66cfbca12611d926"
+        self.CONSUMER_KEY      = "295b8a477c0caaa2ea940069c52c194cdd402b7bf8a449ff322e56e3a1e884f0" #f25b76eb5b1851c75ac39e692a685dbe7f60842e362c43e6c4e53c35635371cc" # (CLIENT ID)
+        self.TOKEN_ID          = "4a78a69173c565fa61b77341478f8e07aef5ea9b9e28cc3c5b78528010300b0c" #"566941115f6634f3a8e7ac9c4d580cd80042f176c560c2ee66cfbca12611d926"
 
    def getSignature(self):
         return Signature(self)

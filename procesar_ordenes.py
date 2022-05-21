@@ -1,3 +1,6 @@
+
+from momi.t_abono import regAbono
+from momi.t_monitor import regMonitor 
 import netsuite as ns
 from momi import utility as util
 from momi import DataBaseClient 
@@ -5,7 +8,7 @@ import logging
 
 from datetime import datetime
 
-import os
+import os, sys
 
 # create logger
 #logger = logging.getLogger('__name__')
@@ -76,6 +79,17 @@ def main(socket=None):
   cont_cabecera = 0
   cont_linea = 0
 
+  # conexion via orm 
+  engine = clienteMomi.getEngine()
+  session = clienteMomi.getSession(engine)
+  
+  #--- establecer el flag de control
+  monitor = regMonitor('orders', usuario='interface')
+  if monitor.desactivarFlag(engine, session) == False:
+      logger.info('Proceso cancelado.  Monitor indica que no está disponible')
+      sys.exit()
+
+  logger.info('Se actualizó el flag del monitor a No disponible')
 
 #------DETALLES--------------
 
@@ -85,13 +99,14 @@ def main(socket=None):
 
   SearchRecordType = clienteNs.salesFactory.TransactionSearchAdvanced(savedSearchScriptId = buscId) #cuando es por id usar savedSearchId  
   
-  searchResult = ns.Search(clienteNs, SearchRecordType)
+  searchResult = ns.Search(clienteNs, SearchRecordType )
 
   if searchResult.status.isSuccess and searchResult.totalRecords>0:  
 
       util.transmitir(socket, 'orders.mensajes', 'Cargando los datos...')
 
       sId = searchResult.searchId
+      pagina_actual = 1
       paginas = searchResult.totalPages
       registros = searchResult.totalRecords
       logger.info('El registro de control de netsuite indica %s registros' % registros)
@@ -123,31 +138,37 @@ def main(socket=None):
       clienteMomi.cursor.execute ('truncate table ns_ordenes_detalle')
 
       logger.info('Iniciando ciclo de carga en MySQL')
-      for rec in searchResult.searchRowList.searchRow:
-          cont_linea +=1
-          args = (
-               nz(rec.basic, ['tranDate','searchValue'])
-             , nz(rec.basic, ['entity','searchValue', 'internalId'])
-             , nz(rec.basic, ['tranId','searchValue'])
-             , nz(rec.basic, ['item','searchValue', 'internalId']) 
-             , nz(rec.itemJoin, ['itemId','searchValue']) #item descr
-             , nz(rec.basic, ['quantity','searchValue'])
-             , nz(rec.basic, ['rate','searchValue'])
-             , nz(rec.basic, ['grossAmount','searchValue'])
-             , nz(rec.basic, ['memo','searchValue'])
-             , getCustomField(rec.basic, 'custcol_ad_dm_dedication', ['searchValue'])
-             , nz(rec.basic, ['location','searchValue','internalId']) 
-             , nz(rec.basic, ['taxAmount','searchValue'])
-             , nz(rec.basic, ['lineSequenceNumber','searchValue'])
 
-          )
+      while pagina_actual <= paginas:
 
-          clienteMomi.cursor.execute (query, args)
-          logger.info('se cargo el documento %s - item %s' % (args[2], args[3]))
-          clienteMomi.connection.commit ()
+          for rec in searchResult.searchRowList.searchRow:
+              cont_linea +=1
+              args = (
+                  nz(rec.basic, ['tranDate','searchValue'])
+                , nz(rec.basic, ['entity','searchValue', 'internalId'])
+                , nz(rec.basic, ['tranId','searchValue'])
+                , nz(rec.basic, ['item','searchValue', 'internalId']) 
+                , nz(rec.itemJoin, ['itemId','searchValue']) #item descr
+                , nz(rec.basic, ['quantity','searchValue'])
+                , nz(rec.basic, ['rate','searchValue'])
+                , nz(rec.basic, ['grossAmount','searchValue'])
+                , nz(rec.basic, ['memo','searchValue'])
+                , getCustomField(rec.basic, 'custcol_ad_dm_dedication', ['searchValue'])
+                , nz(rec.basic, ['location','searchValue','internalId']) 
+                , nz(rec.basic, ['taxAmount','searchValue'])
+                , nz(rec.basic, ['lineSequenceNumber','searchValue'])
 
-          if cont_linea % 10 == 0:
-             util.transmitir(socket, 'orders.procesando', {'cantidad' : cont_cabecera, 'lineas': cont_linea} )
+              )
+
+              clienteMomi.cursor.execute (query, args)
+              logger.info('se cargo el documento %s - item %s' % (args[2], args[3]))
+              clienteMomi.connection.commit ()
+
+              if cont_linea % 10 == 0:
+                util.transmitir(socket, 'orders.procesando', {'cantidad' : cont_cabecera, 'lineas': cont_linea} )
+
+          pagina_actual += 1
+          searchResult = ns.SearchMore(clienteNs, sId, pagina_actual)
 
 
       detalle = 'OK' if cont_linea==registros else 'ERROR'
@@ -169,6 +190,7 @@ def main(socket=None):
   if searchResult.status.isSuccess and searchResult.totalRecords>0:  
 
       sId = searchResult.searchId
+      pagina_actual = 1
       paginas = searchResult.totalPages
       registros = searchResult.totalRecords
       logger.info('El registro de control de netsuite indica %s registros' % registros)
@@ -217,66 +239,74 @@ def main(socket=None):
       
 
       logger.info('Iniciando ciclo de carga en MySQL')
-      for rec in searchResult.searchRowList.searchRow:
-          cont_cabecera +=1
 
-          num_doc = nz(rec.basic, ['tranId','searchValue'])
+      while pagina_actual <= paginas:
 
-          #OJO depende de que en efecto vengan con el tipo datetime (y no esten nulos)
-          fecha_entrega = getCustomField(rec.basic,'custbody_ad_dm_date_delivery', ['searchValue'])
-          fecha_entrega = fecha_entrega.astimezone() if fecha_entrega != None else None  
-          hora_entrega  = getCustomField(rec.basic,'custbody_ad_pa_delivery_time', ['searchValue'])
-          hora_entrega  = hora_entrega.astimezone() if hora_entrega != None else None 
-          total = nz(rec.basic, ['total','searchValue'])
-          
-          fecha_hora_entrega = None
-          if fecha_entrega != None and hora_entrega != None:
-            fecha_hora_entrega = datetime.combine(fecha_entrega.date(), hora_entrega.time())
+          for rec in searchResult.searchRowList.searchRow:
+              cont_cabecera +=1
 
-          args = (
-               num_doc #documento
-             , nz(rec.basic, ['transactionNumber','searchValue']) #transaccion
-             , nz(rec.basic, ['internalId', 'searchValue','internalId']) #internal de la orden
-             , nz(rec.basic, ['tranDate','searchValue'])
-             , nz(rec.customerMainJoin, ['internalId','searchValue', 'internalId'])
-             , getCustomField(rec.basic, 'custbody_ad_pa_identification', ['searchValue'])
-             , nz(rec.basic, ['dateCreated','searchValue'])             
-             , getCustomField(rec.basic, 'custbody_adc_usuario', ['searchValue', 'internalId'])
-             #, getCustomField(rec.basic,'custbody_ad_pa_store' , ['searchValue']) #lugar desde donde se hizo la venta
-             , nz(rec.basic,['location','searchValue','internalId'])
-             , nz(rec.basic, ['type','searchValue'])
-             , total
-             , nz(rec.basic, ['promoCode','searchValue','internalId']) #tipo descuento
-             , None # monto descuento (no se recibe actualmente)
-             , nz(rec.basic, ['createdBy','searchValue', 'internalId'])
-             , nz(rec.basic, ['dateCreated','searchValue'])             
-             , nz(rec.applyingTransactionJoin,['amount','searchValue'] ) #Abono
-             , nz(rec.basic, ['customForm','searchValue', 'internalId']) #tipo de factura
-             , nz(rec.basic, ['memoMain','searchValue'])
-             , nz(rec.basic, ['netAmountNoTax','searchValue'])
-             , fecha_entrega
-             , fecha_hora_entrega
-             , nz(rec.basic, ['status','searchValue']) 
-             , getCustomField(rec.basic,'custbody_ad_pa_identification', ['searchValue']) #RUC
-             , getCustomField(rec.customerMainJoin,'custentity_ad_pa_control_digits', ['searchValue']) #DV
-             , nz(rec.customerMainJoin,['accountNumber','searchValue']) #Nombre del cliente
-             , nz(rec.customerMainJoin,['email','searchValue'])
-             , nz(rec.customerMainJoin,['entityId','searchValue']) #id/telefono
-             , nz(rec.basic, ['taxTotal', 'searchValue'])  
-             , None #lineas (no se recibe por ahora)
+              num_doc = nz(rec.basic, ['tranId','searchValue'])
 
-          
+              #OJO depende de que en efecto vengan con el tipo datetime (y no esten nulos)
+              fecha_entrega = getCustomField(rec.basic,'custbody_ad_dm_date_delivery', ['searchValue'])
+              fecha_entrega = fecha_entrega.astimezone() if fecha_entrega != None else None  
+              hora_entrega  = getCustomField(rec.basic,'custbody_ad_pa_delivery_time', ['searchValue'])
+              hora_entrega  = hora_entrega.astimezone() if hora_entrega != None else None 
+              total = nz(rec.basic, ['total','searchValue'])
+              
+              fecha_hora_entrega = None
+              if fecha_entrega != None and hora_entrega != None:
+                fecha_hora_entrega = datetime.combine(fecha_entrega.date(), hora_entrega.time())
 
-          )
+              args = (
+                  num_doc #documento
+                , nz(rec.basic, ['transactionNumber','searchValue']) #transaccion
+                , nz(rec.basic, ['internalId', 'searchValue','internalId']) #internal de la orden
+                , nz(rec.basic, ['tranDate','searchValue'])
+                , nz(rec.customerMainJoin, ['internalId','searchValue', 'internalId'])
+                , getCustomField(rec.basic, 'custbody_ad_pa_identification', ['searchValue'])
+                , nz(rec.basic, ['dateCreated','searchValue'])             
+                , getCustomField(rec.basic, 'custbody_adc_usuario', ['searchValue', 'internalId'])
+                #, getCustomField(rec.basic,'custbody_ad_pa_store' , ['searchValue']) #lugar desde donde se hizo la venta
+                , nz(rec.basic,['location','searchValue','internalId'])
+                , nz(rec.basic, ['type','searchValue'])
+                , total
+                , nz(rec.basic, ['promoCode','searchValue','internalId']) #tipo descuento
+                , None # monto descuento (no se recibe actualmente)
+                , nz(rec.basic, ['createdBy','searchValue', 'internalId'])
+                , nz(rec.basic, ['dateCreated','searchValue'])             
+                , nz(rec.applyingTransactionJoin,['amount','searchValue'] ) #Abono
+                , nz(rec.basic, ['customForm','searchValue', 'internalId']) #tipo de factura
+                , nz(rec.basic, ['memoMain','searchValue'])
+                , nz(rec.basic, ['netAmountNoTax','searchValue'])
+                , fecha_entrega
+                , fecha_hora_entrega
+                , nz(rec.basic, ['status','searchValue']) 
+                , getCustomField(rec.basic,'custbody_ad_pa_identification', ['searchValue']) #RUC
+                , getCustomField(rec.customerMainJoin,'custentity_ad_pa_control_digits', ['searchValue']) #DV
+                , nz(rec.customerMainJoin,['accountNumber','searchValue']) #Nombre del cliente
+                , nz(rec.customerMainJoin,['email','searchValue'])
+                , nz(rec.customerMainJoin,['entityId','searchValue']) #id/telefono
+                , nz(rec.basic, ['taxTotal', 'searchValue'])  
+                , None #lineas (no se recibe por ahora)
 
-          clienteMomi.cursor.execute (query, args)
-          logger.info('se cargo el documento %s - transacc. %s' % (args[0], args[1]))
-          clienteMomi.connection.commit ()
+              
 
-          if cont_cabecera % 5 == 0:
-             util.transmitir(socket, 'orders.procesando', {'cantidad' : cont_cabecera, 'lineas': cont_linea} )
+              )
+
+              clienteMomi.cursor.execute (query, args)
+              logger.info('se cargo el documento %s - transacc. %s' % (args[0], args[1]))
+              clienteMomi.connection.commit ()
+
+              if cont_cabecera % 5 == 0:
+                util.transmitir(socket, 'orders.procesando', {'cantidad' : cont_cabecera, 'lineas': cont_linea} )
+
+          pagina_actual += 1
+          searchResult = ns.SearchMore(clienteNs, sId, pagina_actual)       
 
       cabecera = 'OK' if cont_cabecera==registros else 'ERROR'
+
+
 
       logger.info('Termina el ciclo de carga de la cabecera, contador en %s vs %s en el registro de control de netsuite ' % (cont_cabecera,registros ) )
       logger.info('Resultado de la carga de cabecera %s' % cabecera)
@@ -285,6 +315,9 @@ def main(socket=None):
 
       logger.info('Resultado del proceso de carga: %s ' % 'OK' if cabecera=='OK' and detalle=='OK' else 'ERROR')
 
+      if  cabecera == detalle == 'OK':
+        if monitor.activarFlag(engine, session):
+            logger.info('Se actualizó el flag del monitor a disponible')
 
 if __name__ == "__main__":
    main()
